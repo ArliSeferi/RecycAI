@@ -1,5 +1,6 @@
 import os
 import torch
+import gdown
 import torchvision.transforms as transforms
 from PIL import Image
 from flask import Flask, request, render_template
@@ -14,8 +15,21 @@ if not os.path.exists(UPLOAD_FOLDER):
 
 app.config["UPLOAD_FOLDER"] = UPLOAD_FOLDER
 
+# Download the model checkpoint if it does not exist
+def download_model():
+    model_path = "checkpoint.pth"
+    if not os.path.exists(model_path):
+        file_id = "1DpNn2O6horKfS6sASTzfgliObG-5AqfC"  # Replace with your actual file ID
+        url = f"https://drive.google.com/uc?id={file_id}"
+        output = "checkpoint.pth"
+        gdown.download(url, output, quiet=False)
+        print("Model downloaded!")
+    else:
+        print("Model already exists.")
+
 # Load the trained model
 device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
+download_model()  # Ensure model is downloaded before loading
 model = RecycleModel().to(device)
 checkpoint = torch.load("checkpoint.pth", map_location=device)
 model.load_state_dict(checkpoint["model_state_dict"])
